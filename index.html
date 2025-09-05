@@ -1343,23 +1343,28 @@
       const storeName = 'พนิดา ค้าหวย';
       // สร้างข้อมูล CSV
       let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-      csvContent += `"${storeName}"\n`; // เพิ่มชื่อร้านบรรทัดแรก
-      csvContent += "วันที่,เวลา,ลูกค้า,ประเภท,เลข,ราคา,รวมรายการ\n";
+      csvContent += `"${storeName}"\n`;
       let grandTotal = 0;
-      history.forEach(item => {
+      history.forEach((item, index) => {
+        // ส่วนหัวของบิล
+        csvContent += `"บิลที่ ${index + 1}","","","","","",""\n`;
+        csvContent += `"วันที่","เวลา","ลูกค้า","ประเภท","เลข","ราคา",""\n`;
         let itemTotal = 0;
         Object.keys(item.details).forEach(typeName => {
           item.details[typeName].forEach(d => {
             if (d.price > 0) {
-              csvContent += `"${item.date}","${item.time}","${item.customer || ''}","${typeName}","${d.num}",${d.price},${item.total}\n`;
+              csvContent += `"","","","${typeName}","${d.num}",${d.price},""\n`;
               itemTotal += d.price;
             }
           });
         });
-        grandTotal += item.total;
+        // สรุปบิล
+        csvContent += `"","","","รวมบิล","","",${itemTotal}\n`;
+        csvContent += `"","","","","","",""\n`;
+        grandTotal += itemTotal;
       });
-      // เพิ่มแถวสรุป
-      csvContent += `,"","","","รวมทั้งหมด",${grandTotal}\n`;
+      // สรุปทั้งหมด
+      csvContent += `"","","","รวมทั้งหมด","","",${grandTotal}\n`;
       // สร้างลิงก์สำหรับดาวน์โหลด
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
