@@ -1,1375 +1,661 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>คำนวณหวย 3 หรือ 2 ตัว</title>
-  <!-- โหลด Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    :root {
-      --primary-color: #7e57c2;
-      --primary-light: #b085f5;
-      --primary-dark: #4d2c91;
-      --secondary-color: #ff7043;
-      --secondary-light: #ffa270;
-      --secondary-dark: #c63f17;
-      --success-color: #66bb6a;
-      --danger-color: #ef5350;
-      --warning-color: #ffca28;
-      --info-color: #42a5f5;
-      --light-bg: #f5f7fb;
-      --card-bg: #ffffff;
-      --text-dark: #37474f;
-      --text-light: #78909c;
-      --border-radius: 16px;
-      --border-radius-sm: 8px;
-      --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      --box-shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.12);
-      --gradient-primary: linear-gradient(135deg, #7e57c2 0%, #5e35b1 100%);
-      --gradient-secondary: linear-gradient(135deg, #ff7043 0%, #f4511e 100%);
-    }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: 'Segoe UI', 'Sukhumvit Set', 'Kanit', Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--light-bg);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
-      overflow-y: auto;
-      color: var(--text-dark);
-      line-height: 1.6;
-    }
-    .container {
-      background: var(--card-bg);
-      padding: 30px;
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
-      width: 480px;
-      max-width: 100%;
-      margin: 20px 0;
-    }
-    .app-header {
-      text-align: center;
-      margin-bottom: 25px;
-      position: relative;
-    }
-    .app-header::after {
-      content: '';
-      display: block;
-      width: 60px;
-      height: 4px;
-      background: var(--gradient-primary);
-      margin: 10px auto;
-      border-radius: 2px;
-    }
-    h2 {
-      color: var(--primary-dark);
-      margin-top: 0;
-      margin-bottom: 5px;
-      font-weight: 700;
-      font-size: 28px;
-    }
-    .app-description {
-      color: var(--text-light);
-      font-size: 14px;
-      margin-bottom: 10px;
-    }
-    .text-center {
-      text-align: center;
-    }
-    .input-group {
-      margin-bottom: 20px;
-    }
-    .section-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--primary-dark);
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-    }
-    .section-title i {
-      margin-right: 8px;
-      font-size: 18px;
-    }
-    .type-selector {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-    .type-btn {
-      background: var(--gradient-primary);
-      margin: 0;
-      padding: 14px;
-      border-radius: var(--border-radius-sm);
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 10px rgba(126, 87, 194, 0.25);
-    }
-    .type-btn.selected {
-      background: var(--gradient-secondary);
-      box-shadow: 0 4px 12px rgba(255, 112, 67, 0.35);
-      transform: translateY(-2px);
-    }
-    .current-type-display {
-      text-align: center;
-      background: rgba(118, 255, 179, 0.1);
-      padding: 10px;
-      border-radius: var(--border-radius-sm);
-      margin-bottom: 20px;
-      font-weight: 600;
-      color: var(--success-color);
-      border: 1px dashed rgba(102, 187, 106, 0.3);
-    }
-    .number-display-center {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 80px;
-      margin-bottom: 20px;
-      font-size: 42px;
-      font-weight: 800;
-      color: var(--primary-dark);
-      background: linear-gradient(135deg, #f5f7fb 0%, #ffffff 100%);
-      border: 2px solid #e0e7ff;
-      border-radius: var(--border-radius);
-      letter-spacing: 8px;
-      transition: all 0.3s ease;
-      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
-    }
-    .number-display-center.active {
-      border-color: var(--primary-light);
-      box-shadow: 0 0 0 3px rgba(126, 87, 194, 0.15), inset 0 2px 5px rgba(0, 0, 0, 0.05);
-      color: var(--primary-color);
-    }
-    .number-pad {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin: 20px 0;
-    }
-    .number-btn {
-      padding: 18px;
-      text-align: center;
-      border: none;
-      border-radius: var(--border-radius-sm);
-      cursor: pointer;
-      background: linear-gradient(135deg, #ffffff 0%, #f5f7fb 100%);
-      font-weight: bold;
-      font-size: 20px;
-      transition: all 0.2s ease;
-      user-select: none;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-      color: var(--primary-dark);
-      border: 1px solid #e0e7ff;
-    }
-    .number-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08);
-      background: linear-gradient(135deg, #ffffff 0%, #e8f4ff 100%);
-    }
-    .number-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    }
-    .clear-btn {
-      background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-      color: var(--danger-color);
-      font-weight: 600;
-      border: 1px solid #ffcdd2;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      margin: 10px 0;
-      color: white;
-      border: none;
-      border-radius: var(--border-radius-sm);
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s ease;
-      font-size: 15px;
-      letter-spacing: 0.5px;
-    }
-    button:hover {
-      opacity: 0.95;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-    button:active {
-      transform: translateY(0);
-      box-shadow: 0 3px 7px rgba(0, 0, 0, 0.1);
-    }
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    .subtype-buttons {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin: 15px 0;
-    }
-    .subtype-btn {
-      background: var(--gradient-primary);
-      margin: 0;
-      padding: 12px;
-      font-size: 14px;
-      opacity: 0.9;
-    }
-    .subtype-btn:hover {
-      opacity: 1;
-    }
-    .subtype-btn.selected {
-      background: var(--gradient-secondary);
-      opacity: 1;
-    }
-    .calculate-btn {
-      background: var(--gradient-secondary);
-      font-size: 16px;
-      padding: 16px;
-      margin-top: 20px;
-      box-shadow: 0 5px 15px rgba(255, 112, 67, 0.3);
-    }
-    .export-excel-btn {
-      background: linear-gradient(135deg, #217346 0%, #1e5a35 100%);
-      margin-top: 10px;
-    }
-    .clear-history {
-      background: linear-gradient(135deg, #b0bec5 0%, #78909c 100%);
-      font-size: 13px;
-      padding: 10px;
-      margin: 5px 0;
-    }
-    .result {
-      margin-top: 25px;
-      font-size: 22px;
-      font-weight: bold;
-      color: var(--success-color);
-      text-align: center;
-      padding: 20px;
-      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-      border-radius: var(--border-radius);
-      box-shadow: 0 5px 15px rgba(102, 187, 106, 0.2);
-      border: 1px solid #c8e6c9;
-    }
-    .input-card {
-      background: linear-gradient(135deg, #f5f7fb 0%, #ffffff 100%);
-      padding: 20px;
-      border-radius: var(--border-radius);
-      margin-bottom: 20px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-      border: 1px solid #e0e7ff;
-    }
-    .sets-container {
-      background: linear-gradient(135deg, #f5f7fb 0%, #ffffff 100%);
-      padding: 18px;
-      border-radius: var(--border-radius);
-      margin: 15px 0;
-      font-size: 15px;
-      border: 1px solid #e0e7ff;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    }
-    .sets-title {
-      font-weight: 600;
-      color: var(--primary-dark);
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-    }
-    .sets-title i {
-      margin-right: 8px;
-      color: var(--primary-color);
-    }
-    .set-badge {
-      display: inline-block;
-      padding: 6px 12px;
-      margin: 5px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-      color: var(--info-color);
-      border: 1px solid #bbdefb;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    }
-    .remove-set {
-      color: var(--danger-color);
-      cursor: pointer;
-      margin-left: 6px;
-      font-weight: bold;
-      transition: all 0.2s ease;
-    }
-    .remove-set:hover {
-      transform: scale(1.2);
-    }
-    .bulk-price-section {
-      background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-      padding: 20px;
-      border-radius: var(--border-radius);
-      margin: 20px 0;
-      border: 1px solid #ffecb3;
-      box-shadow: 0 5px 15px rgba(255, 167, 38, 0.15);
-    }
-    .bulk-price-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .bulk-price-header strong {
-      color: var(--primary-dark);
-      font-weight: 600;
-    }
-    .bulk-price-input {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .bulk-price-input input {
-      flex: 1;
-      padding: 12px;
-      border: 1px solid #ffcc80;
-      border-radius: var(--border-radius-sm);
-      text-align: right;
-      font-weight: bold;
-      background: white;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
-    }
-    .bulk-price-input button {
-      width: auto;
-      padding: 12px 18px;
-      background: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%);
-      white-space: nowrap;
-    }
-    .bulk-price-note {
-      font-size: 13px;
-      color: var(--text-light);
-      margin-top: 10px;
-      font-style: italic;
-    }
-    .price-inputs-container {
-      background: linear-gradient(135deg, #f5f7fb 0%, #ffffff 100%);
-      padding: 20px;
-      border-radius: var(--border-radius);
-      margin: 20px 0;
-      border: 1px solid #e0e7ff;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    }
-    .price-category {
-      margin: 20px 0 12px 0;
-      font-weight: 600;
-      color: var(--primary-dark);
-      padding-bottom: 8px;
-      border-bottom: 2px dashed #e0e7ff;
-      display: flex;
-      align-items: center;
-    }
-    .price-category i {
-      margin-right: 8px;
-      color: var(--primary-color);
-    }
-    .price-row {
-      display: flex;
-      justify-content: space-between;
-      margin: 10px 0;
-      align-items: center;
-      font-size: 15px;
-    }
-    .price-input {
-      width: 110px;
-      padding: 10px;
-      border: 1px solid #e0e7ff;
-      border-radius: var(--border-radius-sm);
-      text-align: right;
-      font-weight: bold;
-      background: white;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
-      transition: all 0.2s ease;
-    }
-    .price-input:focus {
-      outline: none;
-      border-color: var(--primary-light);
-      box-shadow: 0 0 0 2px rgba(126, 87, 194, 0.15);
-    }
-    .history-section {
-      background: linear-gradient(135deg, #f5f7fb 0%, #ffffff 100%);
-      padding: 25px;
-      border-radius: var(--border-radius);
-      margin: 25px 0 10px 0;
-      border: 1px solid #e0e7ff;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    }
-    .history-title {
-      font-weight: 600;
-      color: var(--primary-dark);
-      margin: 0 0 15px 0;
-      padding-bottom: 12px;
-      border-bottom: 2px dashed #e0e7ff;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .history-count {
-      background: var(--primary-light);
-      color: white;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-    .history-item {
-      font-size: 14px;
-      color: var(--text-dark);
-      margin: 10px 0;
-      padding: 12px;
-      background: white;
-      border-radius: var(--border-radius-sm);
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
-      border-left: 3px solid var(--primary-light);
-    }
-    .history-time {
-      font-weight: 600;
-      color: var(--primary-dark);
-      margin-bottom: 5px;
-      display: flex;
-      align-items: center;
-    }
-    .history-time i {
-      margin-right: 6px;
-      color: var(--primary-color);
-    }
-    .history-detail {
-      padding-left: 15px;
-      margin: 5px 0;
-      font-size: 13px;
-    }
-    .history-total {
-      font-weight: 600;
-      color: var(--success-color);
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px dashed #e0e7ff;
-    }
-    .error-message {
-      background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-      color: var(--danger-color);
-      font-size: 14px;
-      text-align: center;
-      margin: 15px 0;
-      padding: 12px;
-      border-radius: var(--border-radius-sm);
-      display: none;
-      border-left: 4px solid var(--danger-color);
-      box-shadow: 0 3px 10px rgba(239, 83, 80, 0.15);
-    }
-    @media (max-width: 500px) {
-      .container {
-        padding: 20px;
-      }
-      .number-btn {
-        padding: 16px;
-      }
-      .number-display-center {
-        height: 70px;
-        font-size: 36px;
-      }
-      .bulk-price-input {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-      }
-      .bulk-price-input button {
-        width: 100%;
-      }
-      .type-selector,
-      .subtype-buttons {
-        grid-template-columns: 1fr;
-      }
-    }
-    .fade-in {
-      animation: fadeIn 0.4s ease-in;
-    }
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(15px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    .pulse {
-      animation: pulse 0.6s ease-in-out;
-    }
-    @keyframes pulse {
-      0% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.05);
-      }
-      100% {
-        transform: scale(1);
-      }
-    }
-    .shake {
-      animation: shake 0.5s ease-in-out;
-    }
-    @keyframes shake {
-      0%,
-      100% {
-        transform: translateX(0);
-      }
-      25% {
-        transform: translateX(-6px);
-      }
-      75% {
-        transform: translateX(6px);
-      }
-    }
-    .floating {
-      animation: floating 3s ease-in-out infinite;
-    }
-    @keyframes floating {
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-5px);
-      }
-    }
-    .store-logo {
-      text-align: center;
-      margin-bottom: 15px;
-      padding: 15px;
-      background: var(--gradient-secondary);
-      border-radius: var(--border-radius);
-      color: white;
-      font-weight: bold;
-      font-size: 20px;
-      box-shadow: var(--box-shadow);
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
-      letter-spacing: 1px;
-      position: relative;
-      overflow: hidden;
-    }
-    .store-logo::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%);
-      background-size: 50px 50px;
-      z-index: 0;
-    }
-    .store-logo-content {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    .store-logo i {
-      font-size: 24px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบ POS ร้านค้า</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 20px 30px;
+            color: white;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 0;
+            min-height: 600px;
+        }
+        
+        .products-section {
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 3px solid #4facfe;
+            padding-bottom: 10px;
+        }
+        
+        .product-form {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+            margin-right: 10px;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa8a8 100%);
+            color: white;
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .product-name {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .product-price {
+            font-size: 1.1em;
+            color: #4facfe;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .cart-section {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cart-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #ecf0f1;
+        }
+        
+        .cart-items {
+            flex-grow: 1;
+            margin-bottom: 20px;
+        }
+        
+        .cart-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .item-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+            color: #bdc3c7;
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .qty-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .qty-btn:hover {
+            background: #2980b9;
+        }
+        
+        .cart-total {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 5px 0;
+        }
+        
+        .total-final {
+            border-top: 2px solid rgba(255,255,255,0.3);
+            padding-top: 15px;
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #f1c40f;
+        }
+        
+        .checkout-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .payment-input {
+            padding: 12px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 16px;
+        }
+        
+        .payment-input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .payment-input:focus {
+            outline: none;
+            border-color: #f1c40f;
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .change-amount {
+            text-align: center;
+            font-size: 1.2em;
+            color: #f1c40f;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        
+        .receipt {
+            background: white;
+            color: #333;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="store-logo">
-      <div class="store-logo-content">
-        <i class="fas fa-store"></i> พนิดา ค้าหวย
-      </div>
+    <div class="container">
+        <div class="header">
+            <h1>🏪 พนิดา การค้า</h1>
+            <p>ระบบจัดการการขายและคำนวณเงินทอน</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="products-section">
+                <h2 class="section-title">📦 จัดการสินค้า</h2>
+                
+                <div class="product-form">
+                    <div class="form-group">
+                        <label for="productName">ชื่อสินค้า:</label>
+                        <input type="text" id="productName" placeholder="กรุณากรอกชื่อสินค้า">
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrice">ราคา (บาท):</label>
+                        <input type="number" id="productPrice" step="0.01" placeholder="0.00">
+                    </div>
+                    <button class="btn btn-primary" onclick="addProduct()">เพิ่มสินค้า</button>
+                </div>
+                
+                <h3 class="section-title">รายการสินค้า</h3>
+                <div class="products-grid" id="productsGrid">
+                    <!-- สินค้าจะแสดงที่นี่ -->
+                </div>
+            </div>
+            
+            <div class="cart-section">
+                <h2 class="cart-title">🛒 ตะกร้าสินค้า</h2>
+                
+                <div class="cart-items" id="cartItems">
+                    <p style="text-align: center; color: #bdc3c7; margin-top: 50px;">ยังไม่มีสินค้าในตะกร้า</p>
+                </div>
+                
+                <div class="cart-total" id="cartTotal" style="display: none;">
+                    <div class="total-row">
+                        <span>ยอดรวม:</span>
+                        <span id="subtotal">0.00 บาท</span>
+                    </div>
+                    <div class="total-row">
+                        <span>ภาษี (7%):</span>
+                        <span id="tax">0.00 บาท</span>
+                    </div>
+                    <div class="total-row total-final">
+                        <span>ยอดสุทธิ:</span>
+                        <span id="total">0.00 บาท</span>
+                    </div>
+                </div>
+                
+                <div class="checkout-section">
+                    <input type="number" id="paymentAmount" class="payment-input" placeholder="จำนวนเงินที่รับ (บาท)" step="0.01">
+                    <div class="change-amount" id="changeAmount"></div>
+                    <button class="btn btn-success" onclick="processPayment()">💰 ชำระเงิน</button>
+                    <button class="btn btn-danger" onclick="clearCart()">🗑️ ล้างตะกร้า</button>
+                </div>
+                
+                <div class="receipt" id="receipt" style="display: none;">
+                    <!-- ใบเสร็จจะแสดงที่นี่ -->
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="app-header">
-      <h2><i class="fas fa-calculator"></i> คำนวณหวย</h2>
-      <p class="app-description">เครื่องมือคำนวณหวย 2 ตัวและ 3 ตัว พร้อมบันทึกประวัติการใช้งาน</p>
-    </div>
-    <!-- ...existing code... -->
-<div class="input-card">
-  <div class="section-title"><i class="fas fa-user"></i> ชื่อลูกค้า</div>
-  <input type="text" id="customerNameInput" placeholder="กรอกชื่อลูกค้า" style="width:100%;padding:12px;border-radius:8px;border:1px solid #e0e7ff;font-size:15px;margin-bottom:10px;">
-</div>
-<!-- ...existing code... -->
 
-    <!-- แสดงข้อความผิดพลาด -->
-    <div class="error-message" id="errorMessage"></div>
-    <!-- เลือกประเภท -->
-    <div class="input-card">
-      <div class="section-title"><i class="fas fa-tag"></i> เลือกประเภทหวย</div>
-      <div class="type-selector">
-        <button class="type-btn" id="type3Btn"><i class="fas fa-hashtag"></i> 3 ตัว</button>
-        <button class="type-btn" id="type2Btn"><i class="fas fa-hashtag"></i> 2 ตัว</button>
-      </div>
-      <div class="current-type-display" id="currentType">
-        <i class="fas fa-info-circle"></i> กรุณาเลือกประเภทหวย
-      </div>
-      <!-- เลือกประเภทย่อย -->
-      <div id="subtypeButtons" style="display:none;">
-        <div class="section-title"><i class="fas fa-bars"></i> เลือกประเภทย่อย</div>
-        <div class="subtype-buttons" id="subtypeButtonsContainer"></div>
-      </div>
-    </div>
-    <!-- แสดงเลขที่กด ตรงกลาง -->
-    <div class="number-display-center" id="numberDisplay">
-      <i class="fas fa-keyboard"></i>
-    </div>
-    <!-- ปุ่มกดเลข -->
-    <div class="input-card">
-      <div class="section-title"><i class="fas fa-th-large"></i> ปุ่มกดเลข</div>
-      <div class="number-pad">
-        <div class="number-btn" data-num="1">1</div>
-        <div class="number-btn" data-num="2">2</div>
-        <div class="number-btn" data-num="3">3</div>
-        <div class="number-btn" data-num="4">4</div>
-        <div class="number-btn" data-num="5">5</div>
-        <div class="number-btn" data-num="6">6</div>
-        <div class="number-btn" data-num="7">7</div>
-        <div class="number-btn" data-num="8">8</div>
-        <div class="number-btn" data-num="9">9</div>
-        <div class="number-btn" data-num="0">0</div>
-        <div class="number-btn clear-btn"><i class="fas fa-eraser"></i> ล้าง</div>
-      </div>
-    </div>
-    <div class="sets-container">
-      <div class="sets-title"><i class="fas fa-list"></i> ชุดเลขที่เพิ่ม</div>
-      <div id="setsContainer">-</div>
-      <button id="clearAllSetsBtn" style="margin-top:10px; background:linear-gradient(135deg,#ffebee 0%,#ffcdd2 100%);color:var(--danger-color);font-weight:600;">
-        <i class="fas fa-trash"></i> เคลียร์ชุดเลขทั้งหมด
-      </button>
-    </div>
-    <!-- ใส่ราคาพร้อมกัน -->
-    <div class="bulk-price-section">
-      <div class="bulk-price-header">
-        <strong><i class="fas fa-money-bill-wave"></i> ใส่ราคาพร้อมกัน</strong>
-      </div>
-      <div class="bulk-price-input">
-        <input type="number" id="bulkPriceInput" min="0" placeholder="จำนวนเงิน">
-        <button id="applyBulkPriceBtn"><i class="fas fa-check"></i> นำไปใช้ทั้งหมด</button>
-      </div>
-      <div class="bulk-price-note">
-        * จะกำหนดราคาให้ทุกชุดเลขที่แสดงด้านล่าง
-      </div>
-    </div>
-    <!-- ช่องใส่เงิน -->
-    <div class="price-inputs-container" id="priceInputs">
-      <div class="section-title"><i class="fas fa-money-bill"></i> กำหนดราคา</div>
-      <div style="text-align: center; color: var(--text-light); padding: 20px;">
-        <i class="fas fa-info-circle" style="font-size: 24px; margin-bottom: 10px;"></i>
-        <p>ไม่มีชุดเลขที่ต้องกำหนดราคาในขณะนี้</p>
-      </div>
-    </div>
-    <button class="calculate-btn" id="calculateBtn" disabled><i class="fas fa-calculator"></i> คำนวณยอดเงิน</button>
-    <div class="result" id="total">
-      <i class="fas fa-coins"></i> ยอดเงินรวม: 0 บาท
-    </div>
-    <!-- ประวัติ -->
-    <div class="history-section">
-      <div class="history-title">
-        <span><i class="fas fa-history"></i> ประวัติการใช้งาน</span>
-        <span class="history-count" id="historyCount">0</span>
-      </div>
-      <button class="clear-history" id="clearHistoryBtn"><i class="fas fa-trash"></i> ล้างประวัติทั้งหมด</button>
-      <button class="export-excel-btn" id="exportExcelBtn"><i class="fas fa-file-excel"></i> ส่งออกเป็น Excel</button>
-      <div id="historyList">
-        <div style="text-align: center; padding: 20px; color: var(--text-light);">
-          <i class="fas fa-inbox" style="font-size: 40px; margin-bottom: 10px;"></i>
-          <p>ยังไม่มีประวัติการใช้งาน</p>
-        </div>
-      </div>
-    </div>
-    <div class="text-right" style="margin-top:40px; text-align:right;">
-        <h4 style="font-weight:600; color:#37474f; margin-bottom:8px;">Contact Natthapon</h4>
-        <div style="font-size:14px; color:#78909c; line-height:1.7;">
-            <p><i class="fas fa-building" style="margin-right:6px;"></i>Line ID: Kunchakub</p>
-            <p><i class="fas fa-phone" style="margin-right:6px;"></i>Tel: +66 (0) 6-535-xxxx</p>
-            <p><i class="fas fa-envelope" style="margin-right:6px;"></i>Email: Natthaponcha@gmail.com</p>
-            <p><i class="fas fa-globe" style="margin-right:6px;"></i>Internal Portal: intranet.company.com</p>
-        </div>
-    </div>
-  <script>
-    // ตัวแปรหลัก
-    let selectedType = null;
-    let selectedSubtypes = []; // เปลี่ยนเป็น array เพื่อเก็บหลายประเภทย่อย
-    let currentNumber = [];
-    let numberSets = [];
-    let combinations = [];
-    let history = [];
-    
-    // แคช DOM (แก้ไข error แล้ว)
-    const $ = (id) => document.getElementById(id);
-    const $$ = (sel) => document.querySelector(sel);
-    
-    // แสดงข้อความผิดพลาด
-    function showError(message) {
-      const errorElement = $('errorMessage');
-      errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
-      errorElement.style.display = 'block';
-      // เคลื่อนหน้าเว็บไปยังข้อความผิดพลาด
-      errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // เพิ่มเอฟเฟกต์สั่น
-      errorElement.classList.add('shake');
-      setTimeout(() => {
-        errorElement.classList.remove('shake');
-      }, 500);
-      // ซ่อนข้อความผิดพลาดหลังจาก 5 วินาที
-      setTimeout(() => {
-        errorElement.style.display = 'none';
-      }, 5000);
-    }
-    
-    // ซ่อนข้อความผิดพลาด
-    function hideError() {
-      $('errorMessage').style.display = 'none';
-    }
-    
-    // แสดงข้อความสำเร็จ
-    function showSuccess(message) {
-      const errorElement = $('errorMessage');
-      errorElement.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
-      errorElement.style.display = 'block';
-      errorElement.style.background = 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)';
-      errorElement.style.color = 'var(--success-color)';
-      errorElement.style.borderLeftColor = 'var(--success-color)';
-      // ซ่อนข้อความหลังจาก 3 วินาที
-      setTimeout(() => {
-        errorElement.style.display = 'none';
-        // รีเซ็ตสไตล์กลับเป็นเดิม
-        errorElement.style.background = '';
-        errorElement.style.color = '';
-        errorElement.style.borderLeftColor = '';
-      }, 3000);
-    }
-    
-    // โหลดข้อมูลจาก localStorage
-    function loadFromLocalStorage() {
-      try {
-        const savedHistory = localStorage.getItem('lotteryHistory');
-        if (savedHistory) {
-          history = JSON.parse(savedHistory);
-          renderHistory();
-        }
-        const savedNumberSets = localStorage.getItem('lotteryNumberSets');
-        if (savedNumberSets) {
-          numberSets = JSON.parse(savedNumberSets);
-          updateSetsDisplay();
-          updateCombinations();
-        }
-      } catch (e) {
-        console.error('Error loading from localStorage:', e);
-      }
-    }
-    
-    // บันทึกข้อมูลลง localStorage
-    function saveToLocalStorage() {
-      try {
-        localStorage.setItem('lotteryHistory', JSON.stringify(history));
-        localStorage.setItem('lotteryNumberSets', JSON.stringify(numberSets));
-      } catch (e) {
-        console.error('Error saving to localStorage:', e);
-      }
-    }
-    
-    // ปุ่มหลัก
-    $('type3Btn').addEventListener('click', () => selectType('3'));
-    $('type2Btn').addEventListener('click', () => selectType('2'));
-    
-    // ปุ่มกดเลข
-    document.querySelector('.number-pad').addEventListener('click', (e) => {
-      if (e.target.classList.contains('number-btn')) {
-        const num = e.target.dataset.num;
-        if (num) {
-          addNumber(parseInt(num));
-          e.target.classList.add('pulse');
-          setTimeout(() => e.target.classList.remove('pulse'), 500);
-        }
-        if (e.target.classList.contains('clear-btn')) clearCurrentInput();
-      }
-    });
-    
-    // ปุ่มย่อย (บน, ล่าง, โต้ด, กลับ) - ใช้ event delegation ที่ครอบคลุม
-    document.addEventListener('click', (e) => {
-      // ตรวจสอบว่าคลิกที่ปุ่มประเภทย่อยหรือไม่
-      if (e.target.classList.contains('subtype-btn') || e.target.closest('.subtype-btn')) {
-        const button = e.target.classList.contains('subtype-btn') ? e.target : e.target.closest('.subtype-btn');
-        const action = button.dataset.action;
-        if (action) {
-          selectSubtype(action);
-          button.classList.add('pulse');
-          setTimeout(() => button.classList.remove('pulse'), 500);
-        }
-      }
-    });
-    
-    // ปุ่มคำนวณ
-    $('calculateBtn').addEventListener('click', () => {
-      calculateTotal(true);
-      saveToLocalStorage();
-    });
-    
-    // ล้างประวัติ
-    $('clearHistoryBtn').addEventListener('click', () => {
-      if (confirm('คุณต้องการล้างประวัติทั้งหมดใช่หรือไม่?')) {
-        clearHistory();
-        saveToLocalStorage();
-      }
-    });
-    
-    // ส่งออกเป็น Excel
-    $('exportExcelBtn').addEventListener('click', exportToExcel);
-    
-    // ใส่ราคาพร้อมกัน
-    $('applyBulkPriceBtn').addEventListener('click', applyBulkPrice);
-    
-    // เคลียร์ชุดเลขทั้งหมด
-    $('clearAllSetsBtn').addEventListener('click', () => {
-      if (numberSets.length === 0) return;
-      if (confirm('ต้องการลบชุดเลขทั้งหมดใช่หรือไม่?')) {
-        numberSets = [];
-        updateSetsDisplay();
-        updateCombinations();
-        saveToLocalStorage();
-      }
-    });
-    
-    // เริ่มต้น
-    window.onload = function () {
-      loadFromLocalStorage();
-      // เพิ่มเอฟเฟกต์ลอยสำหรับหัวข้อแอป
-      $('numberDisplay').classList.add('floating');
-    };
-    
-    // ฟังก์ชันใส่ราคาพร้อมกัน
-    function applyBulkPrice() {
-      const bulkPrice = parseFloat($('bulkPriceInput').value);
-      if (isNaN(bulkPrice) || bulkPrice < 0) {
-        showError('กรุณากรอกจำนวนเงินที่ถูกต้อง');
-        return;
-      }
-      if (combinations.length === 0) {
-        showError('ไม่มีชุดเลขที่สามารถกำหนดราคาได้');
-        return;
-      }
-      combinations.forEach(c => {
-        const input = $(`price_${c.type}_${c.num}`);
-        if (input) {
-          input.value = bulkPrice;
-        }
-      });
-      $('bulkPriceInput').value = '';
-      hideError();
-      // แสดงการยืนยัน
-      $('applyBulkPriceBtn').innerHTML = '<i class="fas fa-check"></i> เรียบร้อยแล้ว!';
-      $('applyBulkPriceBtn').style.background = 'linear-gradient(135deg, #66bb6a 0%, #43a047 100%)';
-      setTimeout(() => {
-        $('applyBulkPriceBtn').innerHTML = '<i class="fas fa-check"></i> นำไปใช้ทั้งหมด';
-        $('applyBulkPriceBtn').style.background = 'linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)';
-      }, 2000);
-    }
-    
-    // เลือกประเภท
-    function selectType(type) {
-      selectedType = type;
-      selectedSubtypes = []; // รีเซ็ตการเลือกประเภทย่อย (เป็น array)
-      $('type3Btn').classList.toggle('selected', type === '3');
-      $('type2Btn').classList.toggle('selected', type === '2');
-      $('currentType').innerHTML = `<i class="fas fa-check-circle"></i> ประเภทหวย: ${type} ตัว - กรุณาเลือกประเภทย่อย`;
-      // อัพเดต class สำหรับแสดงสถานะ active
-      $('numberDisplay').classList.remove('active');
-      const subtypeDiv = $('subtypeButtons');
-      const subtypeContainer = $('subtypeButtonsContainer');
-      subtypeDiv.style.display = 'block';
-      subtypeContainer.innerHTML = '';
-      let buttons = [];
-      if (type === '3') {
-        buttons = [
-          { id: 'on', text: 'ตรง', action: 'on', icon: 'arrow-up' },
-          { id: 'off', text: 'ล่าง', action: 'off', icon: 'arrow-down' },
-          { id: 'tod', text: 'โต้ด', action: 'tod', icon: 'random' },
-          { id: 'rev', text: 'กลับ', action: 'rev', icon: 'exchange-alt' }
-        ];
-      } else {
-        buttons = [
-          { id: 'on', text: 'บน', action: 'on', icon: 'arrow-up' },
-          { id: 'off', text: 'ล่าง', action: 'off', icon: 'arrow-down' },
-          { id: 'rev', text: 'กลับ', action: 'rev', icon: 'exchange-alt' }
-        ];
-      }
-      buttons.forEach(btn => {
-        const b = document.createElement('button');
-        b.className = 'subtype-btn';
-        b.dataset.action = btn.action;
-        b.innerHTML = `<i class="fas fa-${btn.icon}"></i> ${btn.text}`;
-        subtypeContainer.appendChild(b);
-      });
-      clearCurrentInput();
-      updateCombinations();
-      $('total').innerHTML = '<i class="fas fa-coins"></i> ยอดเงินรวม: 0 บาท';
-      hideError();
-    }
-    
-    // เลือกประเภทย่อย (สามารถเลือกหลายตัวได้)
-    function selectSubtype(subtype) {
-      if (!selectedType) {
-        showError('กรุณาเลือกประเภทหวยก่อน (2 ตัว หรือ 3 ตัว)');
-        return;
-      }
-      // ตรวจสอบว่าประเภทย่อยนี้ถูกเลือกแล้วหรือไม่
-      const index = selectedSubtypes.indexOf(subtype);
-      if (index > -1) {
-        // ถ้าเลือกแล้ว ให้ยกเลิกการเลือก
-        selectedSubtypes.splice(index, 1);
-      } else {
-        // ถ้ายังไม่เลือก ให้เพิ่มเข้าไป
-        selectedSubtypes.push(subtype);
-      }
-      // อัปเดตสถานะปุ่มประเภทย่อย
-      document.querySelectorAll('.subtype-btn').forEach(btn => {
-        const action = btn.dataset.action;
-        if (selectedSubtypes.includes(action)) {
-          btn.classList.add('selected');
-        } else {
-          btn.classList.remove('selected');
-        }
-      });
-      // อัปเดตการแสดงผล
-      const subtypeLabels = {
-        'on': 'ตรง',
-        'off': 'ล่าง',
-        'tod': 'โต้ด',
-        'rev': 'กลับ'
-      };
-      if (selectedSubtypes.length === 0) {
-        $('currentType').innerHTML = `<i class="fas fa-check-circle"></i> ประเภทหวย: ${selectedType} ตัว - กรุณาเลือกประเภทย่อย`;
-        $('numberDisplay').classList.remove('active');
-      } else {
-        const selectedLabels = selectedSubtypes.map(s => subtypeLabels[s]).join(', ');
-        $('currentType').innerHTML = `<i class="fas fa-check-circle"></i> ประเภทหวย: ${selectedType} ตัว (${selectedLabels})`;
-        $('numberDisplay').classList.add('active');
-      }
-      // ล้างเลขที่กรอกไว้
-      clearCurrentInput();
-      hideError();
-      if (selectedSubtypes.length > 0) {
-        const selectedLabels = selectedSubtypes.map(s => subtypeLabels[s]).join(', ');
-        showSuccess(`เลือก ${selectedLabels} แล้ว กรุณากรอกเลข ${selectedType} ตัว`);
-      }
-    }
-    
-    // เพิ่มชุดหลายประเภทย่อยพร้อมกัน
-    function addMultipleSetsBySubtypes(subtypes) {
-      if (!selectedType || !currentNumber || currentNumber.length !== parseInt(selectedType)) {
-        showError('ข้อมูลไม่ครบถ้วนสำหรับการเพิ่มชุดเลข');
-        return;
-      }
-      const numStr = currentNumber.join('');
-      // ตรวจสอบว่าตัวเลขถูกต้องหรือไม่
-      if (!/^\d+$/.test(numStr)) {
-        showError('ข้อมูลตัวเลขไม่ถูกต้อง');
-        return;
-      }
-      let addedCount = 0;
-      const subtypeLabels = {
-        'on': 'ตรง',
-        'off': 'ล่าง',
-        'tod': 'โต้ด',
-        'rev': 'กลับ'
-      };
-      try {
-        // แยกประเภท "กลับ" ออกจากประเภทอื่น
-        const hasReverse = subtypes.includes('rev');
-        const otherSubtypes = subtypes.filter(s => s !== 'rev');
-        // เพิ่มเลขปกติสำหรับประเภทที่เลือก (ไม่รวม "กลับ")
-        otherSubtypes.forEach(subtype => {
-          if (selectedType === '2') {
-            if (subtype === 'on') {
-              if (addUniqueSet(numStr, '2_on')) addedCount++;
-            } else if (subtype === 'off') {
-              if (addUniqueSet(numStr, '2_off')) addedCount++;
-            }
-          } else if (selectedType === '3') {
-            if (subtype === 'on') {
-              if (addUniqueSet(numStr, '3_on')) addedCount++;
-            } else if (subtype === 'off') {
-              if (addUniqueSet(numStr, '3_off')) addedCount++;
-            } else if (subtype === 'tod') {
-              if (addUniqueSet(numStr, '3_tod')) addedCount++;
-            }
-          }
-        });
-        // ถ้าเลือก "กลับ" ให้เพิ่มเลขกลับสำหรับประเภทที่เลือกไว้
-        if (hasReverse) {
-          if (selectedType === '2') {
-            const reversed = getReverse(numStr);
-            // เพิ่มเลขกลับสำหรับทุกประเภทที่เลือกไว้
-            otherSubtypes.forEach(subtype => {
-              if (subtype === 'on') {
-                if (addUniqueSet(reversed, '2_on')) addedCount++;
-              } else if (subtype === 'off') {
-                if (addUniqueSet(reversed, '2_off')) addedCount++;
-              }
+    <script>
+        let products = [];
+        let cart = [];
+        let receiptNumber = 1;
+
+        // เพิ่มสินค้าเริ่มต้น
+        function initializeProducts() {
+            const defaultProducts = [
+                { id: 1, name: 'น้ำดื่ม', price: 15.00 },
+                { id: 2, name: 'ขนมปัง', price: 35.00 },
+                { id: 3, name: 'กาแฟกระป๋อง', price: 25.00 },
+                { id: 4, name: 'ลูกอม', price: 5.00 }
+            ];
+            
+            defaultProducts.forEach(product => {
+                products.push(product);
             });
-          } else if (selectedType === '3') {
-            // จัดเรียง 3 ตัว
-            const permutations = getPermutations(numStr);
-            permutations.forEach(p => {
-              if (addUniqueSet(p, '3_REV')) addedCount++;
+            displayProducts();
+        }
+
+        function addProduct() {
+            const name = document.getElementById('productName').value.trim();
+            const price = parseFloat(document.getElementById('productPrice').value);
+
+            if (!name || price < 0) {
+                alert('กรุณากรอกข้อมูลสินค้าให้ครบถ้วน');
+                return;
+            }
+
+            const product = {
+                id: Date.now(),
+                name: name,
+                price: price
+            };
+
+            products.push(product);
+            displayProducts();
+
+            // ล้างฟอร์ม
+            document.getElementById('productName').value = '';
+            document.getElementById('productPrice').value = '';
+        }
+
+        function displayProducts() {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-price">${product.price.toFixed(2)} บาท</div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-success" onclick="addToCart(${product.id})" style="flex: 1;">
+                            🛒 เพิ่มลงตะกร้า
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteProduct(${product.id})">
+                            🗑️
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(productCard);
             });
-          }
         }
-        // อัปเดตการแสดงผล
-        clearCurrentInput();
-        updateCombinations();
-        hideError();
-        // แสดงข้อความยืนยัน
-        if (addedCount > 0) {
-          const selectedLabels = subtypes.map(s => subtypeLabels[s]).join(', ');
-          showSuccess(`เพิ่ม ${numStr} (${selectedLabels}) เรียบร้อยแล้ว - รวม ${addedCount} ชุด`);
-        }
-      } catch (error) {
-        console.error('Error in addMultipleSetsBySubtypes:', error);
-        showError('เกิดข้อผิดพลาดในการเพิ่มชุดเลข');
-      }
-    }
-    
-    // เพิ่มเลข
-    function addNumber(num) {
-      if (!selectedType) {
-        showError('กรุณาเลือกประเภทหวยก่อน (2 ตัว หรือ 3 ตัว)');
-        return;
-      }
-      if (selectedSubtypes.length === 0) {
-        showError('กรุณาเลือกประเภทย่อยก่อน (บน, ล่าง, โต้ด, กลับ)');
-        return;
-      }
-      if (currentNumber.length >= parseInt(selectedType)) {
-        showError(`คุณกรอกเลขครบ ${selectedType} ตัวแล้ว กรุณากด "ล้าง" เพื่อเริ่มใหม่`);
-        return;
-      }
-      currentNumber.push(num);
-      updateDisplay();
-      hideError();
-      // ถ้าครบเลข → เพิ่มชุดสำหรับทุกประเภทย่อยที่เลือกไว้
-      if (currentNumber.length === parseInt(selectedType)) {
-        setTimeout(() => {
-          addMultipleSetsBySubtypes(selectedSubtypes);
-          saveToLocalStorage();
-        }, 300);
-      }
-    }
-    
-    // อัปเดตจอแสดงเลข
-    function updateDisplay() {
-      const display = $('numberDisplay');
-      display.innerHTML = currentNumber.length > 0 ? currentNumber.join('') : '<i class="fas fa-keyboard"></i>';
-      if (currentNumber.length > 0) {
-        display.classList.add('active');
-      } else {
-        display.classList.remove('active');
-      }
-    }
-    
-    // ล้างเลขที่พิมพ์
-    function clearCurrentInput() {
-      currentNumber = [];
-      updateDisplay();
-      hideError();
-    }
-    
-    // อัปเดตชุดเลขที่เพิ่ม
-    function updateSetsDisplay() {
-      const container = $('setsContainer');
-      if (numberSets.length === 0) {
-        container.innerHTML = '-';
-        return;
-      }
-      let html = '';
-      numberSets.forEach((set, index) => {
-        const label = getTypeLabel(set.type);
-        html += `<span class="set-badge">${set.num} (${label}) 
-                 <span class="remove-set" data-index="${index}"><i class="fas fa-times"></i></span></span>`;
-      });
-      container.innerHTML = html;
-      // เพิ่ม event listener สำหรับปุ่มลบ
-      container.querySelectorAll('.remove-set').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const index = parseInt(e.target.closest('.remove-set').dataset.index);
-          removeSet(index);
-        });
-      });
-    }
-    
-    // ฟังก์ชันลบชุดเลข
-    function removeSet(index) {
-      numberSets.splice(index, 1);
-      updateSetsDisplay();
-      updateCombinations();
-      saveToLocalStorage();
-    }
-    
-    // ฟังก์ชันแปลง type เป็น label
-    function getTypeLabel(type) {
-      const labels = {
-        '2_on': 'บน',
-        '2_off': 'ล่าง',
-        '3_on': '3 ตัวตรง',
-        '3_off': '3 ตัวล่าง',
-        '3_tod': '3 ตัวโต้ด',
-        '3_REV': '3 ตัวกลับ'
-      };
-      return labels[type] || type;
-    }
-    
-    // เพิ่มชุดโดยไม่ซ้ำ
-    function addUniqueSet(num, type) {
-      // ตรวจสอบข้อมูลที่จำเป็น
-      if (!num || !type) {
-        console.error('Invalid data for addUniqueSet:', { num, type });
-        return false;
-      }
-      // ตรวจสอบว่าชุดเลขซ้ำหรือไม่
-      const exists = numberSets.some(s => s.num === num && s.type === type);
-      if (!exists) {
-        numberSets.push({ num, type });
-        updateSetsDisplay();
-        return true;
-      }
-      return false;
-    }
-    
-    // กลับเลข 2 ตัว
-    function getReverse(num) {
-      if (!num || num.length !== 2) {
-        console.error('Invalid number for getReverse:', num);
-        return num;
-      }
-      return num[1] + num[0];
-    }
-    
-    // จัดเรียง 3 ตัว
-    function getPermutations(set) {
-      if (!set || set.length !== 3) {
-        console.error('Invalid set for getPermutations:', set);
-        return [set];
-      }
-      const [a, b, c] = set.split('');
-      const permutations = [
-        a + b + c, a + c + b,
-        b + a + c, b + c + a,
-        c + a + b, c + b + a
-      ];
-      // ลบตัวซ้ำ
-      return [...new Set(permutations)];
-    }
-    
-    // อัปเดตชุดทั้งหมด
-    function updateCombinations() {
-      if (numberSets.length === 0) {
-        combinations = [];
-        updatePriceInputs();
-        $('calculateBtn').disabled = true;
-        return;
-      }
-      combinations = [...numberSets];
-      updatePriceInputs();
-      $('calculateBtn').disabled = false;
-    }
-    
-    // แสดงช่องใส่ราคา
-    function updatePriceInputs() {
-      const container = $('priceInputs');
-      if (combinations.length === 0) {
-        container.innerHTML = `
-          <div class="section-title"><i class="fas fa-money-bill"></i> กำหนดราคา</div>
-          <div style="text-align: center; color: var(--text-light); padding: 20px;">
-            <i class="fas fa-info-circle" style="font-size: 24px; margin-bottom: 10px;"></i>
-            <p>ไม่มีชุดเลขที่ต้องกำหนดราคาในขณะนี้</p>
-          </div>
-        `;
-        return;
-      }
-      let html = '<div class="section-title"><i class="fas fa-money-bill"></i> กำหนดราคา</div>';
-      // จัดกลุ่มชุดเลขตามประเภท
-      const grouped = {};
-      combinations.forEach(c => {
-        if (!grouped[c.type]) {
-          grouped[c.type] = [];
-        }
-        grouped[c.type].push(c);
-      });
-      // แสดงชุดเลขที่จัดกลุ่มแล้ว
-      Object.keys(grouped).forEach(type => {
-        const labels = {
-          '2_on': '2 ตัว บน',
-          '2_off': '2 ตัว ล่าง',
-          '3_on': '3 ตัวตรง',
-          '3_off': '3 ตัวล่าง',
-          '3_tod': '3 ตัวโต้ด',
-          '3_REV': '3 ตัวกลับ'
-        };
-        const typeName = labels[type];
-        if (typeName) {
-          html += `<div class="price-category"><i class="fas fa-tag"></i> ${typeName}</div>`;
-          // จัดเรียงชุดเลขตามตัวเลข
-          const sortedSets = [...grouped[type]].sort((a, b) => a.num.localeCompare(b.num));
-          sortedSets.forEach(c => {
-            html += `<div class="price-row">
-              <span>${c.num}</span>
-              <input type="number" class="price-input" id="price_${c.type}_${c.num}" min="0" value="0" placeholder="0">
-            </div>`;
-          });
-        }
-      });
-      container.innerHTML = html;
-      // เพิ่ม event listener สำหรับการคำนวณอัตโนมัติ
-      container.querySelectorAll('.price-input').forEach(input => {
-        input.addEventListener('input', () => {
-          calculateTotal();
-        });
-      });
-    }
-    
-    // คำนวณยอดรวม
-    function calculateTotal(saveToHistory = false) {
-      let total = 0;
-      const priceDetails = {};
-      const labels = {
-        '2_on': '2 ตัว บน',
-        '2_off': '2 ตัว ล่าง',
-        '3_on': '3 ตัวตรง',
-        '3_off': '3 ตัวล่าง',
-        '3_tod': '3 ตัวโต้ด',
-        '3_REV': '3 ตัวกลับ'
-      };
-      combinations.forEach(c => {
-        const input = $(`price_${c.type}_${c.num}`);
-        const price = input ? (parseFloat(input.value) || 0) : 0;
-        total += price;
-        const typeName = labels[c.type];
-        if (!priceDetails[typeName]) priceDetails[typeName] = [];
-        priceDetails[typeName].push({ num: c.num, price });
-      });
-      $('total').innerHTML = `<i class="fas fa-coins"></i> ยอดเงินรวม: ${total.toLocaleString()} บาท`;
-      // แสดงเอฟเฟกต์เฉพาะเมื่อกดปุ่มคำนวณ
-      if (saveToHistory) {
-        $('total').classList.add('fade-in');
-        setTimeout(() => $('total').classList.remove('fade-in'), 500);
-        if (total > 0) {
-          // เพิ่มส่วนนี้
-          const customerName = $('customerNameInput') ? $('customerNameInput').value.trim() : '';
-          history.push({
-            time: new Date().toLocaleTimeString('th-TH'),
-            date: new Date().toLocaleDateString('th-TH'),
-            details: priceDetails,
-            total,
-            customer: customerName // เพิ่มชื่อลูกค้า
-          });
-          renderHistory();
-        }
-      }
-    }
-    
-    // แสดงประวัติ
-    function renderHistory() {
-      const container = $('historyList');
-      const countElement = $('historyCount');
-      countElement.textContent = history.length;
-      if (history.length === 0) {
-        container.innerHTML = `
-          <div style="text-align: center; padding: 20px; color: var(--text-light);">
-            <i class="fas fa-inbox" style="font-size: 40px; margin-bottom: 10px;"></i>
-            <p>ยังไม่มีประวัติการใช้งาน</p>
-          </div>
-        `;
-        return;
-      }
-      let html = '';
-      history.slice().reverse().forEach((item, idx) => {
-        html += `
-          <div class="history-item fade-in">
-            <div class="history-time"><i class="fas fa-clock"></i> ${item.date} ${item.time}</div>
-            ${item.customer ? `<div style="color:var(--primary-dark);font-weight:600;margin-bottom:5px;"><i class="fas fa-user"></i> ลูกค้า: ${item.customer}</div>` : ''}
-          `;
-        Object.keys(item.details).forEach(typeName => {
-          html += `<div class="history-detail"><strong>${typeName}</strong></div>`;
-          item.details[typeName].forEach(d => {
-            if (d.price > 0) {
-              html += `<div class="history-detail">${d.num} → ${d.price.toLocaleString()} บาท</div>`;
+
+        function deleteProduct(productId) {
+            if (confirm('คุณต้องการลบสินค้านี้ใช่หรือไม่?')) {
+                products = products.filter(p => p.id !== productId);
+                displayProducts();
             }
-          });
-        });
-        html += `
-            <div class="history-total">รวมทั้งหมด: ${item.total.toLocaleString()} บาท</div>
-          </div>
-        `;
-        if (idx < history.length - 1) {
-          html += `<hr style="margin: 15px 0; border: none; border-top: 1px dashed #e0e7ff;">`;
         }
-      });
-      container.innerHTML = html;
-    }
-    
-    // ล้างประวัติ
-    function clearHistory() {
-      history = [];
-      renderHistory();
-    }
-    
-    // ส่งออกเป็น Excel
-    function exportToExcel() {
-      if (history.length === 0) {
-      showError('ยังไม่มีประวัติการใช้งาน');
-      return;
-      }
-      // ชื่อร้าน
-      const storeName = 'พนิดา ค้าหวย';
-      // สร้างข้อมูล CSV
-      let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-      csvContent += `"${storeName}"\n`; // เพิ่มชื่อร้านบรรทัดแรก
-      csvContent += "วันที่,เวลา,ลูกค้า,ประเภท,เลข,ราคา,รวมรายการ\n";
-      let grandTotal = 0;
-      history.forEach(item => {
-        let itemTotal = 0;
-        Object.keys(item.details).forEach(typeName => {
-          item.details[typeName].forEach(d => {
-            if (d.price > 0) {
-              csvContent += `"${item.date}","${item.time}","${item.customer || ''}","${typeName}","${d.num}",${d.price},${item.total}\n`;
-              itemTotal += d.price;
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingItem = cart.find(item => item.id === productId);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1
+                });
             }
-          });
+
+            displayCart();
+        }
+
+        function displayCart() {
+            const cartItems = document.getElementById('cartItems');
+            const cartTotal = document.getElementById('cartTotal');
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p style="text-align: center; color: #bdc3c7; margin-top: 50px;">ยังไม่มีสินค้าในตะกร้า</p>';
+                cartTotal.style.display = 'none';
+                return;
+            }
+
+            cartItems.innerHTML = '';
+            cart.forEach(item => {
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item';
+                cartItem.innerHTML = `
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-details">
+                        <span>${item.price.toFixed(2)} บาท</span>
+                        <div class="quantity-controls">
+                            <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
+                            <span style="color: white; font-weight: 600;">${item.quantity}</span>
+                            <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                        </div>
+                        <span>${(item.price * item.quantity).toFixed(2)} บาท</span>
+                    </div>
+                `;
+                cartItems.appendChild(cartItem);
+            });
+
+            // คำนวณยอดรวม
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.07;
+            const total = subtotal + tax;
+
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2) + ' บาท';
+            document.getElementById('tax').textContent = tax.toFixed(2) + ' บาท';
+            document.getElementById('total').textContent = total.toFixed(2) + ' บาท';
+
+            cartTotal.style.display = 'block';
+        }
+
+        function updateQuantity(itemId, change) {
+            const item = cart.find(item => item.id === itemId);
+            if (!item) return;
+
+            item.quantity += change;
+            if (item.quantity <= 0) {
+                cart = cart.filter(cartItem => cartItem.id !== itemId);
+            }
+
+            displayCart();
+        }
+
+        function clearCart() {
+            if (cart.length === 0) return;
+            
+            if (confirm('คุณต้องการล้างสินค้าทั้งหมดในตะกร้าใช่หรือไม่?')) {
+                cart = [];
+                displayCart();
+                document.getElementById('paymentAmount').value = '';
+                document.getElementById('changeAmount').textContent = '';
+                document.getElementById('receipt').style.display = 'none';
+            }
+        }
+
+        function processPayment() {
+            if (cart.length === 0) {
+                alert('ไม่มีสินค้าในตะกร้า');
+                return;
+            }
+
+            const paymentAmount = parseFloat(document.getElementById('paymentAmount').value);
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.07;
+            const total = subtotal + tax;
+
+            if (isNaN(paymentAmount) || paymentAmount < total) {
+                alert('จำนวนเงินไม่เพียงพอ');
+                return;
+            }
+
+            const change = paymentAmount - total;
+            document.getElementById('changeAmount').textContent = `เงินทอน: ${change.toFixed(2)} บาท`;
+
+            // สร้างใบเสร็จ
+            generateReceipt(paymentAmount, change);
+        }
+
+        function generateReceipt(paymentAmount, change) {
+            const now = new Date();
+            const dateTime = now.toLocaleString('th-TH');
+            
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.07;
+            const total = subtotal + tax;
+
+            let receiptHTML = `
+                <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 10px;">
+                    <h3>🏪 ร้านค้าของเรา</h3>
+                    <p>ใบเสร็จรับเงิน #${receiptNumber.toString().padStart(4, '0')}</p>
+                    <p>${dateTime}</p>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+            `;
+
+            cart.forEach(item => {
+                receiptHTML += `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>${item.name}</span>
+                        <span>${item.quantity} x ${item.price.toFixed(2)}</span>
+                        <span>${(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                `;
+            });
+
+            receiptHTML += `
+                </div>
+                
+                <div style="border-top: 1px solid #ccc; padding-top: 10px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>ยอดรวม:</span>
+                        <span>${subtotal.toFixed(2)} บาท</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>ภาษี (7%):</span>
+                        <span>${tax.toFixed(2)} บาท</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; border-top: 1px solid #333; padding-top: 5px; margin-top: 5px;">
+                        <span>ยอดสุทธิ:</span>
+                        <span>${total.toFixed(2)} บาท</span>
+                    </div>
+                </div>
+                
+                <div style="border-top: 1px solid #ccc; padding-top: 10px; margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>เงินที่รับ:</span>
+                        <span>${paymentAmount.toFixed(2)} บาท</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-weight: bold;">
+                        <span>เงินทอน:</span>
+                        <span>${change.toFixed(2)} บาท</span>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #ccc;">
+                    <p>ขอบคุณที่ใช้บริการ</p>
+                    <p>โทร: 02-xxx-xxxx</p>
+                </div>
+            `;
+
+            document.getElementById('receipt').innerHTML = receiptHTML;
+            document.getElementById('receipt').style.display = 'block';
+
+            receiptNumber++;
+            
+            // ล้างตะกร้าหลังการชำระเงิน
+            setTimeout(() => {
+                if (confirm('การชำระเงินสำเร็จ! ต้องการล้างตะกร้าเพื่อขายต่อไปใช่หรือไม่?')) {
+                    cart = [];
+                    displayCart();
+                    document.getElementById('paymentAmount').value = '';
+                    document.getElementById('changeAmount').textContent = '';
+                    document.getElementById('receipt').style.display = 'none';
+                }
+            }, 2000);
+        }
+
+        // คำนวณเงินทอนแบบเรียลไทม์
+        document.getElementById('paymentAmount').addEventListener('input', function() {
+            const paymentAmount = parseFloat(this.value);
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.07;
+            const total = subtotal + tax;
+
+            if (!isNaN(paymentAmount) && paymentAmount >= total) {
+                const change = paymentAmount - total;
+                document.getElementById('changeAmount').textContent = `เงินทอน: ${change.toFixed(2)} บาท`;
+                document.getElementById('changeAmount').style.color = '#f1c40f';
+            } else if (!isNaN(paymentAmount) && paymentAmount > 0) {
+                document.getElementById('changeAmount').textContent = 'จำนวนเงินไม่เพียงพอ';
+                document.getElementById('changeAmount').style.color = '#e74c3c';
+            } else {
+                document.getElementById('changeAmount').textContent = '';
+            }
         });
-        grandTotal += item.total;
-      });
-      // เพิ่มแถวสรุป
-      csvContent += `,"","","","รวมทั้งหมด",${grandTotal}\n`;
-      // สร้างลิงก์สำหรับดาวน์โหลด
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `ประวัติการใช้งาน_หวย_${new Date().toISOString().slice(0, 10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showSuccess('กำลังดาวน์โหลดไฟล์ Excel...');
-    }
+
+        // เริ่มต้นระบบ
+        initializeProducts();
     </script>
 </body>
 </html>
