@@ -1353,7 +1353,7 @@
         Object.keys(item.details).forEach(typeName => {
           item.details[typeName].forEach(d => {
             if (d.price > 0) {
-              csvContent += `"","","","${typeName}","${d.num}",${d.price},""\n`;
+              csvContent += `"${item.date}","${item.time}","${item.customer || ''}","${typeName}","${d.num}",${d.price},""\n`;
               itemTotal += d.price;
             }
           });
