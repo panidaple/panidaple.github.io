@@ -6,6 +6,7 @@
   <title>คำนวณหวย 3 หรือ 2 ตัว</title>
   <!-- โหลด Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root {
       --primary-color: #7e57c2;
@@ -1339,41 +1340,59 @@
       showError('ยังไม่มีประวัติการใช้งาน');
       return;
       }
-      // ชื่อร้าน
+      // ตรวจสอบว่ามีไลบรารี XLSX หรือไม่
+      if (typeof XLSX === 'undefined') {
+        showError('ไม่สามารถโหลดไลบรารี Excel ได้');
+        return;
+      }
       const storeName = 'พนิดา ค้าหวย';
-      // สร้างข้อมูล CSV
-      let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-      csvContent += `"${storeName}"\n`;
+      // Workbook
+      const wb = XLSX.utils.book_new();
+      // Sheet 1: รายละเอียดตามบิล
+      const sheet1Data = [];
+      sheet1Data.push([storeName]);
       let grandTotal = 0;
       history.forEach((item, index) => {
-        // ส่วนหัวของบิล
-        csvContent += `"บิลที่ ${index + 1}","","","","","",""\n`;
-        csvContent += `"วันที่","เวลา","ลูกค้า","ประเภท","เลข","ราคา",""\n`;
+        sheet1Data.push([`บิลที่ ${index + 1}`]);
+        sheet1Data.push(['วันที่', 'เวลา', 'ลูกค้า', 'ประเภท', 'เลข', 'ราคา']);
         let itemTotal = 0;
         Object.keys(item.details).forEach(typeName => {
           item.details[typeName].forEach(d => {
             if (d.price > 0) {
-              csvContent += `"${item.date}","${item.time}","${item.customer || ''}","${typeName}","${d.num}",${d.price},""\n`;
+              sheet1Data.push([item.date, item.time, item.customer || '', typeName, d.num, d.price]);
               itemTotal += d.price;
             }
           });
         });
-        // สรุปบิล
-        csvContent += `"","","","รวมบิล","","",${itemTotal}\n`;
-        csvContent += `"","","","","","",""\n`;
+        sheet1Data.push(['', '', '', 'รวมบิล', '', itemTotal]);
+        sheet1Data.push(['']);
         grandTotal += itemTotal;
       });
-      // สรุปทั้งหมด
-      csvContent += `"","","","รวมทั้งหมด","","",${grandTotal}\n`;
-      // สร้างลิงก์สำหรับดาวน์โหลด
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `ประวัติการใช้งาน_หวย_${new Date().toISOString().slice(0, 10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showSuccess('กำลังดาวน์โหลดไฟล์ Excel...');
+      sheet1Data.push(['', '', '', 'รวมทั้งหมด', '', grandTotal]);
+      const ws1 = XLSX.utils.aoa_to_sheet(sheet1Data);
+      XLSX.utils.book_append_sheet(wb, ws1, 'รายละเอียด');
+
+      // Sheet 2: สรุปยอดต่อบิล
+      const sheet2Data = [];
+      sheet2Data.push(['บิลที่', 'ลูกค้า', 'รวมบิล (บาท)']);
+      history.forEach((item, index) => {
+        // รวมยอดจากรายละเอียด (เผื่ออนาคตหากโครงสร้างเปลี่ยน)
+        let itemTotal = 0;
+        Object.keys(item.details).forEach(typeName => {
+          item.details[typeName].forEach(d => {
+            if (d.price > 0) itemTotal += d.price;
+          });
+        });
+        sheet2Data.push([`บิลที่ ${index + 1}`, item.customer || '', itemTotal]);
+      });
+      sheet2Data.push(['', 'รวมทั้งหมด', grandTotal]);
+      const ws2 = XLSX.utils.aoa_to_sheet(sheet2Data);
+      XLSX.utils.book_append_sheet(wb, ws2, 'สรุปต่อบิล');
+
+      // ดาวน์โหลดเป็น .xlsx
+      const filename = `ประวัติการใช้งาน_หวย_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      XLSX.writeFile(wb, filename);
+      showSuccess('กำลังดาวน์โหลดไฟล์ Excel (.xlsx)...');
     }
     </script>
 </body>
